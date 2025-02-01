@@ -3,6 +3,8 @@ baseURL = 'https://blog.journeythatcounts.nl/'
 
 # This is what goes in <html lang="">
 languageCode = 'en-us'
+# This defines how dates are formatted
+defaultContentLanguage = "en-us"
 
 # Enable emojis globally
 enableEmoji = true
@@ -44,30 +46,37 @@ theme = "hugo-blog-awesome"
 		endLevel = 4 # ToC ends at H4
 		ordered = false # generates <ul> instead of <ol>
 
-[[menu.main]]
-# The page reference (pageRef) is useful for menu highlighting
-# When pageRef is set, setting `url` is optional; it will be used as a fallback if the page is not found.
-  pageRef="/"
-  name = 'Home'
-  url = '/'
-  weight = 10
-[[menu.main]]
-  pageRef='posts'
-  name = 'Posts'
-  url = '/posts/'
-  weight = 20
-[[menu.main]]
-  pageRef='tags'
-  name = 'Tags'
-  url = '/tags/'
-  weight = 30
-[[menu.main]]
-  pageRef="about"
-  name = 'About'
-  url = '/about/'
-  weight = 40
+[Languages.en-us]
+  languageName = "English"
+  languageCode = "en-us"
+  contentDir = "content"
+  weight = 1
 
-[params]
+  [Languages.en-us.menu]
+  [[Languages.en-us.menu.main]]
+  # The page reference (pageRef) is useful for menu highlighting
+  # When pageRef is set, setting `url` is optional; it will be used as a fallback if the page is not found.
+    pageRef="/"
+    name = 'Home'
+    url = '/'
+    weight = 10
+  [[Languages.en-us.menu.main]]
+    pageRef='posts'
+    name = 'Posts'
+    url = '/posts/'
+    weight = 20
+  [[Languages.en-us.menu.main]]
+    pageRef='tags'
+    name = 'Tags'
+    url = '/tags/'
+    weight = 30
+  [[Languages.en-us.menu.main]]
+    pageRef="about"
+    name = 'About'
+    url = '/about/'
+    weight = 40
+
+[Languages.en-us.params]
   sitename = "The journey that counts"
   defaultColor = "" # set color mode: dark, light, auto
   # Setting it to 'auto' applies the color scheme based on the visitor's device color preference.If you don't specify anything, ignore this parameter, or leave it blank,
@@ -90,7 +99,7 @@ theme = "hugo-blog-awesome"
   # full - includes full blog post in the RSS feed. Generated using Hugo .Content .
   # By default (or if nothing is specified), summary is used.
 
-[params.author]
+[Languages.en-us.params.author]
   avatar = "avatar.jpg" # put the file in assets folder; also ensure that image has same height and width
   # Note: image is not rendered if the resource(avatar image) is not found. No error is displayed.
   intro = "The journey that counts"
@@ -98,7 +107,7 @@ theme = "hugo-blog-awesome"
   description = "Ramblings of a journeyman software developer"
 
 # Allow to override webmanifest options
-[params.webmanifest]
+[Languages.en-us.params.webmanifest]
   name = "sitename" # will use "params.sitename" or "title" by default
   short_name = "sitename" # same as name
   start_url = "/" # will use homepage url by default
