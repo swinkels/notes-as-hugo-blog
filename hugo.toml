@@ -1,5 +1,5 @@
-title = "Awesome Hugo blog"
-baseURL = 'https://hba.sid.one/'
+title = "The journey that counts"
+baseURL = 'https://blog.journeythatcounts.nl/'
 
 # This is what goes in <html lang="">
 languageCode = 'en-us'
@@ -68,12 +68,12 @@ theme = "hugo-blog-awesome"
   weight = 40
 
 [params]
-  sitename = "Awesome hugo blog"
+  sitename = "The journey that counts"
   defaultColor = "" # set color mode: dark, light, auto
   # Setting it to 'auto' applies the color scheme based on the visitor's device color preference.If you don't specify anything, ignore this parameter, or leave it blank,
   # the default value is set to 'auto'.
   # You can take a look at layouts/index.html for more information.
-  description = "Minimal Hugo blog theme with light and dark mode support"
+  description = "It's about the journey, not the destination"
   mainSections = ['posts']
   toc = true # set to false to disable table of contents 'globally'
   tocOpen = false # set to true to open table of contents by default
@@ -93,9 +93,9 @@ theme = "hugo-blog-awesome"
 [params.author]
   avatar = "avatar.jpg" # put the file in assets folder; also ensure that image has same height and width
   # Note: image is not rendered if the resource(avatar image) is not found. No error is displayed.
-  intro = "Awesome hugo blog"
-  name = "Sidharth R"
-  description = "A fast, minimalistic Hugo theme with light and dark mode support, for running a personal site or blog."
+  intro = "The journey that counts"
+  name = "Pieter Swinkels"
+  description = "Ramblings of a journeyman software developer"
 
 # Allow to override webmanifest options
 [params.webmanifest]
@@ -114,11 +114,7 @@ theme = "hugo-blog-awesome"
 
 [[params.socialIcons]]
 name = "github"
-url = "https://github.com/hugo-sid"
-
-[[params.socialIcons]]
-name = "twitter"
-url = "https://twitter.com"
+url = "https://github.com/swinkels"
 
 [[params.socialIcons]]
 name = "Rss"
