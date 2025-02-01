@@ -1,6 +1,11 @@
 title = "The journey that counts"
 baseURL = 'https://blog.journeythatcounts.nl/'
 
+# uncomment the next settings to have a static site that you can browse from the
+# file system
+#uglyURLs = true
+#relativeURLs = true
+
 # This is what goes in <html lang="">
 languageCode = 'en-us'
 # This defines how dates are formatted
