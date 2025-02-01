@@ -1,0 +1,17 @@
+{{- define "main" -}}
+<div class="wrapper list-page">
+    <header class="header">
+        <h1 class="header-title center">{{ .Title }}</h1>
+    </header>
+    <main class="page-content" aria-label="Content">
+        {{ range .Data.Terms.Alphabetical }}
+        <article class="post-item">
+            <h4 class="post-item-title">
+                <a href="{{ .Page.RelPermalink }}">{{ .Page.LinkTitle }}</a>
+            </h4>
+            <div class="post-item-right">{{ .Count }}</div>
+        </article>
+        {{ end }} {{/* end range .Data.Terms.Alphabetical */}}
+    </main>
+</div>
+{{- end -}}
