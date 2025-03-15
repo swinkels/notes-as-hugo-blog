@@ -1,0 +1,54 @@
+#+HUGO_BASE_DIR: ../
+#+HUGO_SECTION: posts/2022/12/28
+#+HUGO_SLUG: when-i-update-version-numbers
+
+* When I update version numbers
+:PROPERTIES:
+:EXPORT_FILE_NAME: 20221228.md
+:EXPORT_DATE: 2022-12-28
+:END:
+
+When a colleague asked me when to update the version number of a software
+package, and how, this is what I answered.
+
+First of all, I strive to follow [[https://semver.org/][semver]], even though there are scenario's where
+semver is less applicable. First a recap about semver, for a version x.y.z you
+- increase z if there is a bug fix that leaves the new version backward-compatible;
+- increase y if there is new functionality that leaves the new version backward-compatible;
+- increase x if the new version is not backward-compatible.
+
+Second, I only update the version number when I make a release. I go through the
+list of changes in the CHANGELOG and decide whether to update z, y or x. I only
+increment one of them and the rest I either leave as-is or reset to 0. To give
+some examples of version changes:
+- 1.1.1 becomes 1.1.2
+- 1.1.1 becomes 1.2.0
+- 1.1.1 becomes 2.0.0
+
+Note that I wrote "I only increment one value". With that I mean that if version
+1.1.1 would contain 10 different bug fixes, I would still use version number
+1.1.2 for the next release and not 1.1.11.
+
+** zest.releaser
+
+One other thing, in the past I used a tool called [[https://zestreleaser.readthedocs.io/en/latest/][zest.releaser]] to automagically
+update the version numbers in the code and in the CHANGELOG. It would set the
+new version number, commit that change, set the next version number with postfix
+~dev~ and commit that change too. This is how it played out in practice:
+- Say you start with a version 1.1.1dev.
+- zest.releaser changes the release to version 1.1.1, commit and tag that
+  change. This tagged commit is the version to release.
+- zest.releaser changes the release to version 1.1.2dev and commit that change.
+  This version is the starting point for new development.
+
+The use of postfix ~dev~ helps you distinguish development versions from actual
+releases. I really liked that idea but I noticed that team members could find it
+difficult to work with this versioning scheme. For example, if you have version
+1.1.1dev, some would expect the next version to be 1.1.2 and not just 1.1.1.
+
+I found zest.releaser to be really nice but because of the above /and/ because
+of the fact that it doesn't support pyproject.toml yet[fn:1], I haven't used it for
+quite some time.
+
+[fn:1] The zest.releaser GitHub repo has an open issue to support
+pyproject.toml, [[https://github.com/zestsoftware/zest.releaser/issues/373][#373 "support PEP621"]].

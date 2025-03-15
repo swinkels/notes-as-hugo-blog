@@ -1,0 +1,25 @@
+#+HUGO_BASE_DIR: ../
+#+HUGO_SECTION: posts/2023/11/28
+#+HUGO_SLUG: creating-animated-gifs-of-a-desktop-area
+
+* Creating animated GIFs of a desktop area                            :linux:
+:PROPERTIES:
+:EXPORT_FILE_NAME: 20231128.md
+:EXPORT_DATE: 2023-11-28
+:END:
+
+In [[../10/20231029.org][my previous note]] I created [[../10/pydor-runs-doctests.gif][an animated GIF]] of how I used Emacs package pydor
+to run Python doctests, of course from Emacs. An animated GIF is a really good
+way to show how a tool like that works. I wouldn't say that "an image says more
+than a thousand words", but it does add a lot to a textual description.
+
+The following two tools made it really easy to create the animated GIF:
+
+- [[https://github.com/phw/peek][Peek]] to record animated GIF images from my screen;
+- [[https://www.thregr.org/wavexx/software/screenkey/][Screenkey]] to show the keys being pressed.
+
+Peek worked like a charm for my use case but unfortunately it is [[https://github.com/phw/peek/issues/1191][no longer
+maintained]]. According to the author, there are too many technical challenges
+that need to be solved for Peek to have a future, such as a move to Wayland
+and/or GTK3. As an alternative, he mentions [[https://github.com/SeaDve/Kooha][Kooha]] so that's a tool to keep in
+mind.

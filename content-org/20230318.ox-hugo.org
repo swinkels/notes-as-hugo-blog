@@ -1,0 +1,169 @@
+#+HUGO_BASE_DIR: ../
+#+HUGO_SECTION: posts/2023/03/18
+#+HUGO_SLUG: create-dataframe-from-string-table
+
+#+PROPERTY: header-args:python :session *Python*
+#+PROPERTY: header-args:python+ :results output
+#+PROPERTY: header-args:python+ :eval never-export
+#+PROPERTY: header-args:python+ :exports both
+
+* Create DataFrame from string table                          :python:pandas:
+:PROPERTIES:
+:EXPORT_FILE_NAME: 20230318.md
+:EXPORT_DATE: 2023-03-18
+:END:
+
+You can find the code for the ~read_table~ function mentioned in this note in
+subdirectory [[https://github.com/swinkels/notes/tree/main/2023/03/20230318][20230318]].
+
+The really handy Pandas function ~read_fwf~ creates a ~DataFrame~ from a
+fixed-width text table, for example:
+#+begin_src python
+import io
+
+import pandas as pd
+
+table = """
+FirstName LastName FirstAppearance
+Donald    Duck     1934
+Mickey    Mouse    1928
+Goofy              1932
+        """
+
+# read_fwf expects a filename, either as a string, a path object, or as the
+# next line shows, a stream/file-like object
+df = pd.read_fwf(io.StringIO(table))
+print(df)
+#+end_src
+
+#+RESULTS:
+:   FirstName LastName  FirstAppearance
+: 0    Donald     Duck             1934
+: 1    Mickey    Mouse             1928
+: 2     Goofy      NaN             1932
+
+I mostly use it in unit tests, when I need to set up ~DataFrame~ instances.
+They're easier to create using ~read_fwf~ and the resulting code is more
+readable, more communicative.
+
+However, ~read_fwf~ doesn't handle column names that contain spaces:
+#+begin_src python
+table = """
+FirstName LastName First appearance
+Donald    Duck     1934
+Mickey    Mouse    1928
+Goofy              1932
+        """
+
+df = pd.read_fwf(io.StringIO(table))
+print(df)
+#+end_src
+
+#+RESULTS:
+:   FirstName LastName  First  appearance
+: 0    Donald     Duck   1934         NaN
+: 1    Mickey    Mouse   1928         NaN
+: 2     Goofy      NaN   1932         NaN
+
+Column "First appearance" is interpreted as two separate columns, which is not
+what you want. Enclosing the column name in single quotes, as a hint to
+~read_fwf~, doesn't help.
+
+This lead me to write function ~read_table~ that wraps ~read_fwf~ to allow you
+to specify multi-word column names:
+#+begin_src python
+table = """
+FirstName LastName First appearance
+Donald    Duck     1934
+Mickey    Mouse    1928
+Goofy              1932
+        """
+
+df = read_table(table, columns=["FirstName", "LastName", "First appearance"])
+print(df)
+#+end_src
+
+#+RESULTS:
+:   FirstName LastName  First appearance
+: 0    Donald     Duck              1934
+: 1    Mickey    Mouse              1928
+: 2     Goofy      NaN              1932
+
+~read_table~ only accepts a string whereas ~read_fwf~ accepts a filename, path
+object or stream/file-like object. As mentioned, my primary use case for
+~read_table~ is to setup a ~DataFrame~ from hard-coded data.
+
+~read_fwf~ doesn't like it when you have a column whose values have spaces:
+#+begin_src python
+table = """
+Name          FirstAppearance
+Donald Duck   1934
+Mickey Mouse  1928
+Goofy         1932
+        """
+
+stream = io.StringIO(table)
+
+df = pd.read_fwf(stream)
+print(df)
+#+end_src
+
+#+RESULTS:
+:      Name Unnamed: 1  FirstAppearance
+: 0  Donald       Duck             1934
+: 1  Mickey      Mouse             1928
+: 2   Goofy        NaN             1932
+
+~read_table~ has your back here too /if you specify the column names/:
+#+begin_src python
+table = """
+Name          FirstAppearance
+Donald Duck   1934
+Mickey Mouse  1928
+Goofy         1932
+        """
+df = read_table(table, columns=["Name", "FirstAppearance"])
+print(df)
+#+end_src
+
+#+RESULTS:
+:            Name  FirstAppearance
+: 0   Donald Duck             1934
+: 1  Mickey Mouse             1928
+: 2         Goofy             1932
+
+~read_table~ wraps ~read_fwf~ and if you pass in a keyword argument that
+~read_table~ doesn't have in its signature, it passes it on to ~read_fwf~. This
+allows ~read_table~ to support the use of a column to specify an index:
+#+begin_src python
+table = """
+   FirstName LastName FirstAppearance
+ 0 Donald    Duck     1934
+ 2 Mickey    Mouse    1928
+ 3 Goofy              1932
+   """
+df = read_table(table, index_col=0)
+print(df)
+print(df.index)
+#+end_src
+
+#+RESULTS:
+:   FirstName LastName  FirstAppearance
+: 0    Donald     Duck             1934
+: 2    Mickey    Mouse             1928
+: 3     Goofy      NaN             1932
+: Int64Index([0, 2, 3], dtype='int64')
+
+Here, ~read_table~ passes ~index_col=0~ to ~read_fwf~. Because of that,
+~read_fwf~ lets the first column provide the index.
+
+*Closing thoughts*
+
+I realized that having to specify all columns names is not ideal. In one of the
+examples above, only column name "First Appearance" has a space but ~read_table~
+requires you to specify the other column names too. This is something to address
+in a newer version.
+
+Furthermore, in the example with multi-word column values, you had to specify
+the column names to import the table correctly. There's no real need for that as
+~read_table~ can determine the column names automatically.

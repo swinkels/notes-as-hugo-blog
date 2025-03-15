@@ -1,0 +1,28 @@
+#+HUGO_BASE_DIR: ../
+#+HUGO_SECTION: posts/2022/12/26
+#+HUGO_SLUG: github-fine-grained-personal-access-tokens
+
+* GitHub fine-grained personal access tokens
+:PROPERTIES:
+:EXPORT_FILE_NAME: 20221226.md
+:EXPORT_DATE: 2022-12-26
+:END:
+
+If you need to push a commit to a GitHub repo over HTTPS and you don't want to
+provide a username & password, a GitHub "fine-grained personal access token" is
+the way to go[fn:1]. The owner of the repo can create that token and configure
+(1) to which repo(s) it provides access and (2) the kind of access it allows to
+these repo(s), the /repository permissions/. The following screenshot shows some
+of these permissions:
+
+
+[[./20221226-repository-permissions.png]]
+
+
+There are a lot of permissions you can configure, but to push commits to a repo,
+you only need "*Read* access to metadata" and "*Read* and *Write* access to
+code". The first one is mandatory and you need it to "search repositories, list
+collaborators, and access repository metadata".
+
+[fn:1] I prefer SSH to HTTPS, but I've worked with locked-down company laptops
+where SSH access was disabled.

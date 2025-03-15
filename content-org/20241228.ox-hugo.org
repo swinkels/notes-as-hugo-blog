@@ -1,0 +1,339 @@
+#+HUGO_BASE_DIR: ../
+#+HUGO_SECTION: posts/2024/12/28
+#+HUGO_SLUG: looking-over-the-fence-at-doom-emacs
+
+#+PROPERTY: header-args :eval never
+
+* Looking over the fence at Doom Emacs                                :emacs:
+:PROPERTIES:
+:EXPORT_FILE_NAME: 20241228.md
+:EXPORT_DATE: 2024-12-28
+:END:
+
+In May of this year I decided to have a look at another Emacs starter kit[fn:1],
+[[https://github.com/doomemacs/doomemacs][Doom Emacs]]. It's not that I was dissatisfied with [[https://www.spacemacs.org/][Spacemacs]], which has been my
+trusty day-to-day driver for years, but it can be good to look over the fence
+every once in a while and see what "the others" are doing.
+
+This note describes my experience with Doom as it was in May 2024, almost half a
+year ago now. Since then, issues I encountered may have been resolved and new
+ones may have been introduced. Also, part of what this note describes is from
+memory and I /will/ have forgotten some of the good *and* bad.
+
+** Things to like
+
+First of all, the installation experience was great. You clone its repo and then
+run a script in that repo to download the third-party packages and compile them.
+The output of this script is very clean:
+#+begin_src
+  Installing Doom Emacs!
+
+  ✓ Created ~/repos/swinkels/emacs-doomemacs/emacs-29.4-doomemacs-20241224/.doom.d/
+    - Creating ~/repos/swinkels/emacs-doomemacs/emacs-29.4-doomemacs-20241224/.doom.d/init.el...
+    ✓ Done!
+    - Creating ~/repos/swinkels/emacs-doomemacs/emacs-29.4-doomemacs-20241224/.doom.d/config.el...
+    ✓ Done!
+    - Creating ~/repos/swinkels/emacs-doomemacs/emacs-29.4-doomemacs-20241224/.doom.d/packages.el...
+    ✓ Done!
+  Generate an envvar file? (see `doom help env` for details) (y or n) y
+  > Generating envvars file
+    ✓ Generated ~/repos/swinkels/emacs-doomemacs/emacs-29.4-doomemacs-20241224/.emacs.d/.local/env
+  > Installing plugins
+    > Installing straight...
+    > Ensuring packages are installed and built...
+      > Updating recipe repos...
+      > Cloning link-hint.el...emacsmirror-mirror...
+        - Checked out 9153eafc776549376bb85d9ff555fef83aca8285
+      > Building link-hint...
+      > Building link-hint > Cloning avy...
+        - Checked out be612110cb116a38b8603df367942e2bb3d9bdbe
+      > Building link-hint > Building avy...
+      > Building link-hint...
+      > Cloning ob-async...
+        - Pinned to 9aac486073f5c356ada20e716571be33a350a982
+      > Building ob-async...
+      > Building ob-async > Cloning emacs-async...
+        - Pinned to 9aac486073f5c356ada20e716571be33a350a982
+  [...]
+#+end_src
+The installation of Spacemacs takes a slightly different approach. You also
+clone its repo but then you start Emacs to download and compile packages. Emacs
+shows you the output of that process as-is and sometimes you would see
+compilation warnings pass by. In general you can ignore these warning but I'm
+always worried that I end up with a broken Spacemacs.
+
+Doom is a thin layer above the third-party packages that make up the Emacs
+ecosystem, thinner than Spacemacs. With less code between you and the upstream
+package(s), chances are that an issue you encounter is an upstream issue. For
+example, using Doom I encountered [[https://github.com/emacs-evil/evil-collection/issues/637][an issue]] with the Evil bindings for Magit. I
+was able to debug it in Doom and [[https://github.com/emacs-evil/evil-collection/issues/637#issuecomment-2142920018][document the explanation upstream]]. The good
+thing is that if you can report or fix an issue upstream, it benefits more users
+than just Doom users.
+
+Doom uses a suite of packages to implement completion such as Vertico, Consult
+and Embark. According to the Doom documentation, "[these packages enhance] the
+built-in completing-read interface, rather than replacing it with a parallel
+ecosystem like ivy and helm do". One nice thing is that selecting another option
+can immediately switches the content of the active buffer. An example is
+~(+vertico/switch-workspace-buffer)~, which shows you the list of buffers. If go
+move through this list, the active window immediately switches to that buffer.
+They also show more information.
+
+On a side note, if you want to know more abut Vertico, Consult, Embark, I advise
+you to have a look at the Youtube video [[https://youtu.be/d3aaxOqwHhI?si=R5wikU4ai2MzvuQ-][Emacs: modern minibuffer packages]] by
+[[https://protesilaos.com/][Protesilaos Stavrou]]. It's a very good 45 minutes intro to these packages.
+
+It doesn't use the [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Easy-Customization.html][Customize interface]] that Emacs provides to set variables, see
+[[https://github.com/doomemacs/doomemacs/issues/2059#issuecomment-554141081][this comment]] by lissner in [[https://github.com/doomemacs/doomemacs/issues/2059][ doomemacs#2059]]:
+#+begin_quote
+Doom was designed to be configured from your config files, not through M-x
+customize. Doom doesn't support it and never will.
+#+end_quote
+
+I have a kind of love-hate relationship with this interface. I like how easy it
+is to discover and set a value but I don't like how it stores them as one big
+pile of settings. This makes it hard to document why you set a variable in a
+certain way.
+
+** Things not to like
+
+Doom is a thin layer above the third-party packages that make up the Emacs
+ecosystem, even more so than Spacemacs. The drawback is that Spacemacs also
+implements several features that improve the editing experience. These can be
+simple things, such as a function to toggle between a horizontal and vertical
+layout of two windows, ~spacemacs/window-layout-toggle~, or one to open a line
+above the current line, ~spacemacs/evil-insert-line-above~.
+
+I find the Spacemacs keybindings to be more user-friendly than the ones in Doom.
+For example, the Doom keybinding to ~ace-delete-window~ is ~SPC w C-c~, which I
+find to be more cumbersome than Spacemacs keybinding ~SPC w D~. The Doom
+keybindings to window operations are an extreme example: they seem to be
+autogenerated and somewhat "everything but the kitchen sink".
+
+The Doom Emacs Lisp code comes with its own way of doing things, for example, it
+has its own [[https://github.com/doomemacs/doomemacs/blob/master/docs/getting_started.org#package-management][declarative package manager]]. It comes with its own Emacs Lisp
+library, which to me, makes its code less easy to grokk. To be honest, that was
+something I also had with other Doom-specific code, which to me was less
+accessible than Spacemacs-specific code. Big disclaimer: I'm not a proficient
+Emacs Lisp developer. I can read it and with the help of the docs and Google, I
+can write Emacs Lisp code, but that's as far as it goes.
+
+Doom uses its own "customizable popup window management system" to manage
+windows it deems less important, such as "code output or a help buffer" - these
+quotes are from the [[https://docs.doomemacs.org/latest/#/modules/ui/popup][the official Doom documentation]]. Especially compared to the
+way Spacemacs handles such buffers, I found the Doom system to be a hindrance.
+For example, it could use new windows when it would be better to reuse existing
+ones, delete windows when you pressed ~C [~ (to force Evil normal state), or
+hide the modelines for specific window content. It is configurable but the
+out-of-the-box experience was suboptimal. Regarding the hidden modelines, even
+with the correct configuration, sometimes they would remain hidden.
+
+I also encountered some annoying paper cuts and bugs. For example, when you run
+Emacs in the terminal, the shortcut for ~embark-act~, ~C ;~, doesn't work and
+you need to rebind it. Again in the terminal, initally the cursor didn't change
+when you switch to insert mode. It turns out there is special Doom module to
+configure Emacs for terminal use but by default it wasn't active. vi command
+~df[space]~, "delete up to and including the first space", deletes the
+characters until the first space but actually leaves the space[fn:3]. Of course,
+there were my aforementioned issues with the Doom popup management system.
+
+** Other remarks
+
+Doom is known for its speed. Indeed, it starts up fast: a pristine Doom
+installation starts in 1.2 seconds on my main development machine. Its startup
+time is shorter but comparable to a pristine installation of Spacemacs on the
+same machine, which starts in 3.3 seconds. I don't remember if it was faster
+full configured in my day-to-day work, at least it didn't result in a lasting
+impression.
+
+Its default color theme ~doom-one~ is very readable. In Spacemacs I use
+~spacemacs-dark~, which I've been using for years. If I compare the themes
+side-by-side, the characters seem to stand out a bit less in ~spacemacs-dark~,
+making them slightly less readable. On the other hand, the inactive line numbers
+in ~doom-one~ are very subdued, making them harder to read[fn:2]. in an when
+there's less ambient light. The Doom themes are provided by a [[https://github.com/doomemacs/themes][separate package]],
+so maybe Spacemacs can use them.
+
+And of course, it was different from what I was used to in Spacemacs. That's not
+always a bad thing. For example, in Spacemacs I enclose a visual selection with
+parenthesis using ~s )~ whereas in Doom I have to use ~S )~. However it's
+Spacemacs that deviates from upstream packages [[https://github.com/emacs-evil/evil-surround][evil-surround]] and ultimately
+[[https://github.com/tpope/vim-surround][vim-surround]] by using the former keybinding.
+
+** Notes from May 2024
+
+For archival purposes, this section contains the notes I made when I made my
+foray into Doom. These notes are incomplete: I encountered (and worked around)
+issues that aren't mentioned here. You can find the ~.doom.d~ directory I ended
+up with [[https://github.com/swinkels/notes/tree/main/2024/12/20241228][here]].
+
+Finally, I used Doom Emacs commit hash 9620bb45 dated April 18, 2024.
+
+*** Open TODOs
+
+- [ ] replace ~M w <number>~ by ~M-<number>~ to switch windows - more convenient
+- [ ] find replacement for ~M-V~ (and other Vertico bindings to toggle display mode) - Xfce hijacks ~M-V~
+
+*** [2024-05-27 ma]
+
+- [ ] Xfce uses keybinding for leader key in Evil insert mode
+
+The Doom default binding is ~M-SPC~ but Xfce already uses that binding (to show
+the window menu). It took some time to find out [[https://discourse.doomemacs.org/t/what-are-leader-and-localleader-keys/153#changing-the-leader-prefixes-2][how]] to change the leader key in
+Doom, but in the end this did the trick:
+#+begin_src emacs-lisp
+(setq doom-leader-alt "M-m")
+#+end_src
+
+*** [2024-05-23 do]
+
+- [X] replace by ~C-:~ by ~SPC SPC~ - more convenient
+
+#+begin_src emacs-lisp
+(map! :leader
+      "SPC" nil ;; disable the original binding
+      :desc "M-x" "SPC" #'execute-extended-command)
+#+end_src
+This is inspired by the change of [[https://practical.li/doom-emacs/introduction/spacemacs-to-doom/][Spacemacs to Doom Emacs]] changes by
+Practically. Practically maintains a really informative [[https://practical.li/spacemacs/][guide]] and [[https://github.com/practicalli/spacemacs-config][custom
+Spacemacs config]] to facilitate Clojure development. He also started a [[https://practical.li/doom-emacs/][custom
+Doom Emacs config]] to do something similar for Doom Emacs, but its development
+is paused as he isn't using Doom Emacs anymore.
+
+I noticed that a ~C [~, so the key to switch to Evil normal state, would close
+the flycheck buffer list window when already in Evil normal state. It turns out
+that this window is a popup window and it's a feature of popup windows. From the
+[[https://docs.doomemacs.org/latest/#/modules/ui/popup][Doom documentation on the popup module]],
+#+begin_quote
+More than that, popups ought to be the second class citizens of my editor;
+spawned off to the side, discarded with the push of a button (e.g. ESC or C-g),
+and easily restored if I want to see them again.
+#+end_quote
+
+Function ~set-popup-rule!~ and its parameter ~:quit~ specify how a popup window
+should react to ESC. Its default value ~t~, which is set in variable
+~+popup-default-parameters~, closes the popup. The popup rules for flycheck
+don't overrule this default.
+
+*** [2024-05-20 ma]
+
+- [X] disable automatic highlighting of current word in Python mode
+
+This turned out to be a feature of ~lsp-mode~. In my Spacemacs config I disabled
+it already and in Doom I can do the same:
+#+begin_src emacs-lisp
+(after! lsp-mode
+  (setq lsp-enable-symbol-highlighting nil))
+#+end_src
+
+- [X] find replacement for ~C-;~ for ~embark-act~ - doesn't work in a terminal
+
+I settled for ~C-c ;~:
+#+begin_src emacs-lisp
+(map! "C-c ;" #'embark-act)
+#+end_src
+
+- [X] use ~,~ instead of ~SPC m~ as local leader key
+
+As documented in Discourse, [[https://discourse.doomemacs.org/t/how-to-re-bind-keys/56#changing-the-leader-prefixes-2][Changing the leader prefixes]]
+
+- [X] use characters for windows of ~ace-window~ instead of numbers
+
+The use of numbers is the default setting. The ~ace-window~ [[https://github.com/abo-abo/ace-window#aw-keys][README]] describes how
+to set variable ~aw-keys~ to use characters instead. However, how do you set
+variables in Doom? I found the answer in [[https://github.com/doomemacs/doomemacs/issues/2059#issuecomment-554141081][this comment]] by lissner in
+[[https://github.com/doomemacs/doomemacs/issues/2059][doomemacs#2059]]. Note what lissner also says in his comment:
+#+begin_quote
+Doom was designed to be configured from your config files, not through M-x
+customize. Doom doesn't support it and never will.
+#+end_quote
+
+- [X] find keybinding for ~ace-delete-window~ - ~SPC w D~ in Spacemacs
+
+The keybinding in Doom is ~SPC w C-c~, which /really is/ more cumbersome than
+~SPC w D~ in Spacemacs. To be honest, I find the Spacemacs keybindings to be
+more user-friendly than the ones in Doom. An extreme example are the Doom
+keybindings to window operations: they seem to be autogenerated and somewhat
+"everything but the kitchen sink".
+
+- [X] find keybinding for ~avy-goto-char-time~ - ~SPC j j~ in Spacemacs
+
+The keybinding is ~g s /~.
+
+- [X] disable automatic indentation in ~org-mode~
+
+Automatic indentation comes courtesy of ~org-indent-mode~, which prefixes
+paragraphs with "virtual spaces".
+
+I was afraid that ~fill-paragraph~ would see these virtual spaces as actual
+spaces when filling the paragraph. So if you would view the file in another
+editor, the paragraphs wouldn't use the available width. If that would be the
+case, I would've disabled ~org-indent-mode~ even though I like their visual
+appearance. Fortunately ~fill-paragraph~ works correctly because virtual spaces
+aren't seen as spaces at all: the first column after the virtual spaces is
+column 0.
+
+- [X] warn on unsaved files - this already cost me some changes
+
+Apparently I used ~SPC q Q~, which is the keybinding in Spacemacs to kill Emacs
+after asking to save the unsaved files. However, in Doom it's "Quit Emacs
+without saving" ;). In Doom, use ~SPC q q~ instead.
+
+- [X] find keybinding/function to swith to previous buffer
+
+The command to switch to the previous buffer is bound to ~SPC b [~. I find the
+binding that Spacemacs uses more convenient, viz ~SPC b TAB~, but let's give
+~SPC b [~ some time before I add another keybinding.
+
+- [X] switch cursor in insert mode in a terminal
+
+[[https://github.com/doomemacs/doomemacs/issues/1994][doomissue#1994]] reports this exact issue. lissner [[https://github.com/doomemacs/doomemacs/issues/1994#issuecomment-548483431][suggests]] to use package
+[[https://github.com/7696122/evil-terminal-cursor-changer][evil-terminal-cursor-changer]] - note the date, 31 October 2019. He doesn't want
+to integrate it in Doom because it "is no longer maintained, is unreasonably
+buggy and lacks support for a number of terminals".
+
+About ~evil-terminal-cursor-changer~ being buggy, [[https://github.com/syl20bnr/spacemacs/pull/15322][this Spacemacs pull request]]
+(from February 2022) lead me to believe Spacemacs used it so I installed [[https://github.com/amosbird/evil-terminal-cursor-changer][a fork]]
+in Doom - the fork was mentioned in [[https://github.com/doomemacs/doomemacs/pull/1999][this pull request]] to Doom. However, that
+version suffers from excessive cursor flickering in tmux: after every character
+you type, the cursor changes to a block and then back to a bar within a fraction
+of a second. Later found [[https://github.com/syl20bnr/spacemacs/commit/d48bc8d9][this more recent Spacemacs commit]] that removes
+~evil-terminal-cursor-changer~ due to "buggy behaviors".
+
+At the time of writing Spacemacs uses another package to switch the cursor,
+[[https://github.com/denrat/term-cursor.el][term-cursor.el]]. I installed that package and it works nicely.
+
+By the way, I noticed that lissner [[https://github.com/doomemacs/doomemacs/commit/0a4841b2479a37096a59454ecd330f5b88818885][did add]] ~evil-terminal-cursor-changer~ as a
+dependency of the then new module ~tty~ - at 20 August 2020, so less then a year
+after the comment about ~evil-terminal-cursor-changer~ being buggy. I tried
+~tty~ and cursor switching seems to work nicely. Doom uses the version of
+~evil-terminal-cursor-changer~ suggested earlier, so not the fork I used.
+
+** Closing (?) thoughts
+
+I used Doom Emacs for several weeks "in production". It felt fresh, "close(r) to
+the metal", and I liked the different approach to completion and candidate
+selection. On the other hand, Doom lacked certain Spacemacs features and
+keybindings I was used to and I did encounter some Doom-specific issues. About
+these issues, I was able to debug and fix (or work around) them, but at some
+point I wondered whether it was worth the effort. So after those weeks, I
+decided to go back to Spacemacs.
+
+This doesn't mean the lure of another Emacs configuration than Spacemacs is
+gone. Spacemacs isn't ideal either, especially when it reimplements
+functionality for which there is a better third-party alternative. The grass is
+greener on the other side and I can imagine I'll revisit Doom or another starter
+kit.
+
+PS: Why not create my own configuration from scratch? After all, I've used my
+own config for years before I settled on Spacemacs. Well, a framework like
+Spacemacs provides me with a very solid base. I choose to spent my time on
+working with that base instead of building my own.
+
+** Footnotes
+
+[fn:1] I used to call this an "Emacs configuration" but it seems the term
+       "starter kit" is the term to use.
+[fn:2] This is an issue in an environment with lots of ambient light, for
+       example when the main light source is located behind your monitor.
+[fn:3] This turned out to be GitHub issue [[https://github.com/hlissner/evil-snipe/issues/86][evil-snipe#86]].

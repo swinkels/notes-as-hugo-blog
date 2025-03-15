@@ -1,0 +1,68 @@
+#+HUGO_BASE_DIR: ../
+#+HUGO_SECTION: posts/2022/12/08
+#+HUGO_SLUG: git-for-windows-protocol-error-when-using-pageant
+
+* Git for Windows protocol error when using Pageant             :windows:git:
+:PROPERTIES:
+:EXPORT_FILE_NAME: 20221208.md
+:EXPORT_DATE: 2022-12-08
+:END:
+
+On Windows I use the SSH agent ~pageant~ to manage my keys for Git. This allows
+me to use the same agent process from Windows and MSYS2 Zsh sessions. But after
+I switched to ~pageant~ on a workstation that previously used the [[https://github.com/GitCredentialManager/git-credential-manager][Git Credential
+Manager]], Git commands that accessed a remote, failed:
+#+begin_src
+C:\Users\Pieter\repos\my-repo> git pull
+fatal: protocol error: bad line length character: logi
+FATAL ERROR: Error reading from console: Error 109: The pipe has been ended.
+#+end_src
+
+The first hit by Google was this question on StackOverflow, [[https://stackoverflow.com/questions/8170436/git-remote-error-fatal-protocol-error-bad-line-length-character-unab][Git Remote: Error:
+fatal: protocol error: bad line length character: Unab]]. Most answers pointed in
+the direction of ~pageant~ and ~plink~, where ~plink~ replaces the ~ssh~ command
+as it can talk to ~pageant~. Was ~pageant~ running? Were the keys loaded? Those
+all checked out so I focussed on ~plink~.
+
+To determine if ~plink~ was able to connect to the repo server, I executed the
+following command:
+#+begin_src
+C:\Users\Pieter\repos\my-repo> plink -v -agent -P <port> <server>
+Looking up host "<server>" for SSH connection
+Connecting to <IP address> port <port>
+We claim version: SSH-2.0-PuTTY_Release_0.78
+Connected to <IP address>
+Remote version: SSH-2.0-SSHBlackbox.10
+Using SSH protocol version 2
+Doing Diffie-Hellman group exchange
+Doing Diffie-Hellman key exchange using 2048-bit modulus and hash SHA-256 (SHA-NI accelerated) with a server-supplied group
+Host key fingerprint is:
+ssh-rsa 2048 <fingerprint>
+Initialised AES-256 SDCTR (AES-NI accelerated) outbound encryption
+Initialised HMAC-SHA-256 (SHA-NI accelerated) outbound MAC algorithm
+Initialised AES-256 SDCTR (AES-NI accelerated) inbound encryption
+Initialised HMAC-SHA-256 (SHA-NI accelerated) inbound MAC algorithm
+Pageant is running. Requesting keys.
+Pageant has 1 SSH-2 keys
+login as:
+#+end_src
+Note the last line, which asks me for my username. It starts with the same
+characters as the first line of the error message, ~logi~. Another Google search
+brought me to [[https://stackoverflow.com/a/56803412][this answer]] to the StackOverflow question mentioned before:
+#+begin_quote
+TL;DR: Do not omit username@ in your remote URLs when on Windows.
+#+end_quote
+By default SSH uses your current username, but ~plink~ doesn't do that. So when
+Git calls ~plink~, ~plink~ will ask as which user it should connect.
+
+Indeed, the ~.gitconfig~ for that repo defined ~origin~ without the username:
+#+begin_src
+[remote "origin"]
+	url = ssh://<server>:<port>/<repo-path>
+#+end_src
+Once I added the username to the repo address,
+#+begin_src
+[remote "origin"]
+	url = ssh://<username>@<server>:<port>/<repo-path>
+#+end_src
+the Git commands worked.

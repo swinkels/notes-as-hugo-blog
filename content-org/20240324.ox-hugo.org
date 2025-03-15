@@ -1,0 +1,119 @@
+#+HUGO_BASE_DIR: ../
+#+HUGO_SECTION: posts/2024/03/24
+#+HUGO_SLUG: upgrading-spacemacs
+
+* Upgrading Spacemacs                                                 :emacs:
+:PROPERTIES:
+:EXPORT_FILE_NAME: 20240324.md
+:EXPORT_DATE: 2024-03-24
+:END:
+
+Spacemacs consists of 2 parts,
+- Spacemacs to manage and configure a set of third-party Emacs packags and
+- the third-party packages themselves.
+
+The Spacemacs code itself is continuously updated. These update bring new
+features and fix bugs, or contain changes to take into account features or bugs
+in the third-party packages. This means Spacemacs is coupled to the state of the
+most-recent third-party packages. As Boromir would tell you,
+
+[[/20240324/you-do-not-simply-upgrade-spacemacs.jpg]]
+
+To avoid any issues, I always update Spacemacs from scratch whenever I update
+Spacemacs. This means I have to update [[https://github.com/swinkels/spacemacs-config][my Spacemacs configuration]], and install
+the latest versions of the third-party packages. The last time I did that was
+than a year ago - October 19, 2022 - and it was time for an update.
+
+** The update itself...
+
+The actual update seemed to go smoothly. However, after a few minutes of using
+Spacemacs, the buffer with key bindings for multi-key commands didn't show up
+anymore. I use the buffer extensively so this was a shows stopper. Some
+googling[fn:1] lead me to issue [[https://github.com/syl20bnr/spacemacs/issues/16276#issuecomment-1939865121][spacemacs#16276]], "Keyboard + Command hints stop
+showing". It turned out that a recent update to package ~helm-descbinds~ package
+disabled the mode that shows the key bindings, ~which-key~. [[https://github.com/syl20bnr/spacemacs/issues/16276#issuecomment-1939865121][This issue comment]]
+contained a workaround I added to my Spacemacs config[fn:2].
+
+~helm-descbinds~ is part of [[https://github.com/emacs-helm/helm][Emacs-Helm]], a "framework for incremental completions
+and narrowing selections". Spacemacs uses Helm everywhere to let you easily
+select a candidate from a large list of candidates, for example to select a file
+from a directory tree, or in the case of ~helm-descbinds~, an entry from the
+complete list of keys and the functions they bind.
+
+The candidates come from one or more "sources". When Helm shows you the
+candidates, it uses the source names as headers in the candidate list. In my
+previous Spacemacs config, I could go from source to source but now Helm only
+let me cycle through the candidates of the current source. I found out that to
+move to the next source, I had to use a separate keystroke, ~C-h~. This behavior
+is managed by variable ~helm-move-to-line-cycle-in-source~, whose default had
+changed in [[https://github.com/emacs-helm/helm/commit/a4380caef3a9e4b1e8d11458852ab67ba9b4cf58][a recent commit]] to Helm. I prefer the previous behavior so I
+configured the original default.
+
+Back to ~helm-descbinds~, another [[https://github.com/emacs-helm/helm-descbinds/commit/889145babe3319418a699fffbf242d4f52414c5a][very recent commit]], "Make display more fancy",
+adds some "fancy" formatting to display the keys and their functions. For me,
+the formatting makes the list look messy and less clear. So I restored the
+original, plain formatting in my Spacemacs config.
+
+There was another visual change to Helm: the buffer of candidates shows a help
+message below the mode line. The first time you see this help you might think
+"good to know" but for each helm command, it's always the same message. This
+help message is called "persistent help" and thanks to issue [[https://github.com/emacs-helm/helm/issues/1948][helm#1948]], I found
+out that you can disable it by setting ~helm-display-header-line~ to ~nil~.
+Unfortunately this leads to a minor visual glitch when you run Emacs in a
+terminal[fn:3], but you win some, you lose some.
+
+Summarizing, the update itself took 10 minutes, but addressing the showstopper
+and restoring some previous behavior took me several hours. Once a year, it's a
+small investment in the improvements the latest versions of Spacemacs and the
+third-party packages bring.
+
+** Other changes
+
+When I decided to update Spacemacs, I also wanted to improve some other aspects
+of my Spacemacs config. One of them was the way I managed changes to my config
+for different workstations. The original idea was to use one Git branch for each
+workstation. A drawback is that you have to cherry pick changes from one branch
+to another to keep all the active ones up-to-date. I hardly ever did that so in
+practice I was maintaining a single branch with local, uncommitted changes.
+
+So I decided to use a different approach: work from a single branch and keep all
+workstation-specific changes in a separate workstation-specific file. Up till
+now that works better than the multi-branch approach, allthough there are still
+some environment-specific details in the shared user config.
+
+The README of my Spacemacs config repo contained the Emacs Lisp code of my user
+config and you would generate that config from it. It also held the code for 2
+bash scripts. This looked nice but in the end the extra steps of this [[https://en.wikipedia.org/wiki/Literate_programming][literate
+programming]] approach weren't worth it. Currently the README is just a README,
+the user config a standalone Emacs lisp file and the single remaining bash file
+a standalone bash file[fn:4].
+
+The final change worth mentioning is that I added Emacs support for the Git repo
+of [[https://yadm.io/][yadm]], a dotfile manager. yadm uses a bare Git repo with your home directory
+as a work tree but [[https://en.wikipedia.org/wiki/Literate_programming][magit]], a very good [[https://stackoverflow.com/questions/6976473/what-does-the-term-porcelain-mean-in-git][Git porcelain]] in Emacs, doesn't support
+it. However, there is a way to use magit for yadm. I stumpled upon [[https://philjackson.github.io/yadm/emacs/magit/2021/07/25/using-yadm-via-magit/][this Emacs
+List snippet]] to configure access using to the yadm repo over [[https://www.gnu.org/software/tramp/][Tramp]]. Tramp is
+an Emacs package that "provides an [...] interface to editing remote files [...]
+as if they were local". It exposes the contents of the bare Git repo as local
+files to magit[fn:5].
+
+** Footnotes
+
+[fn:1] At the moment I use [[https://kagi.com/][Kagi]] instead of Google for my web searches, but
+       that's another story.
+
+[fn:2] A week later, [[https://github.com/syl20bnr/spacemacs/pull/16288][this update]] to Spacemacs uses a new option of
+       ~helm-descbinds~ to not disable ~which-key~. I still rely on the
+       workaround.
+
+[fn:3] When you run Emacs in the terminal and use ~helm-display-header-line~
+       equal to ~nil~, the minibuffer shows a cursor that moves with your input
+       to the helm session. It only shows and moves the cursor, it doesn't show
+       the characters you type.
+
+[fn:4] There were 2 bash files, ~emacs-nw.el~ to start an Emacs client in
+       terminal mode and ~magit.el~ to start Magit in terminal mode. I deleted
+       the latter because I never used it.
+
+[fn:5] Later I found that this approach is described in the [[https://github.com/TheLocehiliosan/yadm/blob/master/yadm.md][yadm man page]] as
+       well.

@@ -1,0 +1,62 @@
+#+HUGO_BASE_DIR: ../
+#+HUGO_SECTION: posts/2023/01/05
+#+HUGO_SLUG: error-dialog-about-pythoncom39.dll-in-conda-virtualenv
+
+* Error dialog about pythoncom39.dll in conda virtualenv       :python:conda:
+:PROPERTIES:
+:EXPORT_FILE_NAME: 20230105.md
+:EXPORT_DATE: 2023-01-05
+:END:
+
+At a client I had to review the code of a new Python project. I cloned the repo,
+used conda to create a virtualenv and finally let Poetry install all Python
+dependencies. This went without a hitch but after the installation of the
+dependencies, each subsequent Poetry command would show me an error dialog like
+this:
+#+begin_src
+(my-venv) C:\Users\Pieter\repos\my-venv>poetry cache list --help
+#+end_src
+
+[[/20230105/poetry-error.png]]
+
+So each Poetry command triggered a failing search for a specific procedure in a
+DLL in my /base/ conda environment. Some googling (and trial & error) lead me to
+[[https://github.com/mhammond/pywin32/blob/main/README.md#the-specified-procedure-could-not-be-found--entry-point-not-found-errors][this section]] of the README of the pywin32 package:
+#+begin_quote
+A very common report is that people install pywin32, but many imports fail with
+errors similar to [The specified procedure could not be found / Entry-point not
+found Errors?].
+
+In almost all cases, this tends to mean there are other pywin32 DLLs installed
+in your system, but in a different location than the new ones. This sometimes
+happens in environments that come with pywin32 pre-shipped (eg, anaconda?).
+#+end_quote
+Indeed, this could describe the issue I encountered: pywin32 is one of the
+dependencies installed, pythoncom39.dll is a pywin32 DLL and I'm working in a
+conda virtualenv.
+
+The README starts with telling you that pywin32 has a postinstall step, that you
+have to execute manually. It doesn't tell you why that step is necessary but it
+restates the advise after the quoted section. So here it goes:
+#+begin_src
+(my-venv) C:\Users\Pieter\repos\my-venv>cd C:\Users\Pieter\Miniconda3\envs\my-venv\Scripts
+(my-venv) C:\Users\Pieter\Miniconda3\envs\my-venv\Scripts>python pywin32_postinstall.py -install
+Parsed arguments are: Namespace(install=True, remove=False, wait=None, silent=False, quiet=False, destination='C:\\Users\\Pieter\\Miniconda3\\envs\\my-venv\\Lib\\site-packages')
+Copied pythoncom39.dll to C:\Users\Pieter\Miniconda3\envs\my-venv\pythoncom39.dll
+Copied pywintypes39.dll to C:\Users\Pieter\Miniconda3\envs\my-venv\pywintypes39.dll
+You do not have the permissions to install COM objects.
+The sample COM objects were not registered.
+-> Software\Python\PythonCore\3.9\Help[None]=None
+-> Software\Python\PythonCore\3.9\Help\Pythonwin Reference[None]='C:\\Users\\Pieter\\Miniconda3\\envs\\my-venv\\Lib\\site-packages\\PyWin32.chm'
+Pythonwin has been registered in context menu
+Creating directory C:\Users\Pieter\Miniconda3\envs\my-venv\Lib\site-packages\win32com\gen_py
+Can't install shortcuts - 'C:\\Users\\Pieter\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Python 3.9' is not a folder
+The pywin32 extensions were successfully installed.
+
+(my-venv) C:\Users\Pieter\Miniconda3\envs\my-venv\Scripts>
+#+end_src
+So when you install pywin32, apparently the pywin32 DLLs aren't installed in a
+location where Python, or a tool that relies on it such as Poetry, can find
+them. The postinstall step copies them to a directory that does allow them to be
+found. And indeed, after I executed this step, the Poetry commands didn't result
+in the error dialog anymore.

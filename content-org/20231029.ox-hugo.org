@@ -1,0 +1,84 @@
+#+HUGO_BASE_DIR: ../
+#+HUGO_SECTION: posts/2023/10/29
+#+HUGO_SLUG: introducing-pydor,-an-emacs-package-to-run-doctests
+
+* Introducing pydor, an Emacs package to run doctests    :emacs:python:
+:PROPERTIES:
+:EXPORT_FILE_NAME: 20231029.md
+:EXPORT_DATE: 2023-10-29
+:END:
+
+[[https://develop.spacemacs.org/][Spacemacs]] configures several key bindings to run Python unit tests, such as "run
+test at point" and "run tests in current module". It lacks the functionality to
+run doctests so I wrote a small Emacs package for that: [[https://github.com/swinkels/pydor][pydor]], the Python
+doctest runner. The following animated GIF shows how it works in Spacemacs:
+
+[[/20231029/pydor-runs-doctests.gif]]
+
+The Emacs package is implemented by an Emacs Lisp file to determine the location
+of the docstring at point and a Python file to load and run the doctests in that
+docstring.
+
+** Finding the module to import
+
+The thing that took the most work was the Python code to import the module that
+contains the docstring. I use Python module [[https://docs.python.org/3/library/doctest.html#doctestfinder-objects][doctest.DocTestFinder]] to retrieve
+the doctests and this function requires an imported module. This is really
+straightforward if the module is a standalone module package. In that case you
+just import it using its path. However, if the module is part of a package, you
+have to import it via its full module name. Say you have a module ~my_module.py~
+in ~mypackage/my_subpackage/my_module~, then you have to import the module as
+~mypackage.my_subpackage.my_module~. The question then becomes what that full
+module path is.
+
+To find the full module path, I used the following heuristic:
+
+1. For each path ~p~ in ~sys.path~.
+2. If ~p~ is not an ancestor of the module, go to 1.
+3. If each directory in the path from ~p~ to the module has a ~__init__.py~,
+   that path is the full module path. If not go to 1.
+
+This works in a lot of cases, but it turns out the directories in "namespace
+packages" do not have to have an ~__init__.py~. It goes beyond the scope of this
+note to explain what these packages are - the [[https://packaging.python.org/en/latest/guides/packaging-namespace-packages/][Python Package User Guide]] contains
+a good description [[https://packaging.python.org/en/latest/guides/packaging-namespace-packages/][here]]. For now it suffices that pydor doesn't support
+namespace packages.
+
+** Eask to replace Cask
+
+Another thing worthy of mention is my use of [[https://emacs-eask.github.io/][Eask]], a "CLI for building, running,
+testing and managing your Emacs Lisp dependencies". Until now I used Cask for
+this, but the documentation of Cask has become very wanting. For example, its
+README contains the following question and answer:
+#+begin_quote
+> Why is everything you say inconsistent with cask.readthedocs.io?
+
+I would disregard nearly everything at cask.readthedocs.io [...]
+#+end_quote
+I don't use Cask that much and each time I setup a new Emacs Lisp project, I
+need to consult its documentation. If I then read a statement like that, it
+doesn't inspire me with much confidence.
+
+I went looking for an alternative and came across Eask, which labels itself the
+"successor to Cask". Eask is well-documented and indeed, if you're familiar with
+Cask, it's very easy to use productively. It /is/ written in JavaScript, but
+that's not something you notice. It comes with pre-built binaries so you don't
+have to dabble in node to install it.
+
+** Future plans
+
+I use pydor in my work projects and there it works like a charm. It's a small
+little project and I can imagine I use it as a test-bed to learn new things.
+Especially two things come to mind:
+
+- publish pydor on MELPA
+- setup automatic builds on GitHub[fn:1]
+
+I've never done this for any of my hobby projects so it's a great way to get some
+experience with this. Have a look at the [[https://github.com/swinkels/pydor/blob/main/TODOs.org][TODOs.org]] in the pydor repo. It lists
+several other things I might work on.
+
+** Footnotes
+
+[fn:1] I've done this for Azure DevOps and Atlassian Bamboo projects, just never
+for my personal projects on GitHub.

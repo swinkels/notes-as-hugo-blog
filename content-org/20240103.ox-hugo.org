@@ -1,0 +1,106 @@
+#+HUGO_BASE_DIR: ../
+#+HUGO_SECTION: posts/2024/01/03
+#+HUGO_SLUG: what-makes-a-design-object-oriented?
+
+* What makes a design object-oriented?                               :design:
+:PROPERTIES:
+:EXPORT_FILE_NAME: 20240103.md
+:EXPORT_DATE: 2024-01-03
+:END:
+
+On HackerNews there was [[https://news.ycombinator.com/item?id=38781277][a discussion]] about the presentation "[[https://harmful.cat-v.org/software/OO_programming/_pdf/Pitfalls_of_Object_Oriented_Programming_GCAP_09.pdf][Pitfalls of object
+oriented programming]]" (PDF). The HackerNews comments contain [[https://news.ycombinator.com/item?id=38792682][a thread]] about 4
+characteristics of object-oriented programming (OOP), viz.
+
+- abstraction,
+- polymorphism,
+- inheritance, and
+- encapsulation.
+
+I first encountered these characteristics in the early 2000s through the
+mnemonic "A PIE". I always found it to be a fuzzy "definition" as abstraction,
+polymorphism and encapsulation aren't unique to OOP. Another [[https://news.ycombinator.com/item?id=38791122][thread]] in the
+comments made me wonder what it is that makes a design (or implementation)
+"object-oriented"? This note tries to clarify that.
+
+Alan Kay is the one that coined the term "object-oriented", something he
+acknowledges in [[http://userpage.fu-berlin.de/~ram/pub/pub_jf47ht81Ht/doc_kay_oop_en][this email]]. In that same email he states
+#+begin_quote
+OOP to me means only messaging, local retention and protection and hiding of
+state-process, and extreme late-binding of all things.
+#+end_quote
+
+But what does this mean? I googled for "OOP to me means only messaging, local
+retention and protection" and found the article [[https://ovid.github.io/articles/alan-kay-and-oo-programming.html][Alan Kay and OO Programming]] by
+Curtis Poe that gives a thoughtful and plausible explanation. Let's go over the
+explanations given.
+
+*local retention and protection and hiding of state-process*
+
+Poe makes the case that this doesn't mean encapsulation, or only encapsulation,
+but also isolation - "protection" - from anything bad happening inside an
+object. The more I think about it, the more it makes sense. Poe states that
+#+begin_quote
+If you think of Web browsers and servers as objects, however, we see something
+closer to his vision. If your browser crashed every time a web server crashed or
+was otherwise unavailable, Microsoft IIS would never have reached 2.0.
+#+end_quote
+That seems to coincide with Kay's opinion. In [[https://computinged.wordpress.com/2010/09/11/moti-asks-objects-never-well-hardly-ever/#comment-3766][this comment]], Kay states:
+#+begin_quote
+A good example of a large system I consider “object-oriented” is the Internet.
+It has billions of completely encapsulated objects (the computers themselves)
+and uses a pure messaging system of “requests not commands”, etc.
+#+end_quote
+The Internet isn't robust because the nodes cannot access the internals of other
+nodes, it's robust because it can handle all kinds of failures in nodes or in
+the communication (paths) between nodes. We'll get back to the robustness aspect
+when we discuss messaging.
+
+The above still doesn't elaborate on the "local retention" part. I also googled
+for that, but I didn't find a satisfactory explanation.
+
+*extreme late binding*
+
+Late binding means that the method to call is determined at runtime and not at
+compile time. It's something that is possible in most programming languages, or
+at least can be implemented in them. Poe argures that the differentiating aspect
+is the "extreme" part: to be able to call methods that only exist at runtime but
+not yet at "compile" time. Extreme late binding allows you to build systems that
+can change /while they are still running/ (emphasis is from the original
+article). There are programming languages / runtime environments where this is
+possbile, for example Erlang and Smalltalk. Of course, the Internet wouldn't
+work without it.
+
+*messaging*
+
+Poe acknowledges that Kay is rather vague here and even Poe's interpretation of
+the term remains rather abstract (at least to me). However, I can connect Poe's
+next words to robustness:
+#+begin_quote
+In other words, you don't execute code by calling it by name: you send some data
+(a message) to an object and it figures out which code, if any, to execute in
+response.
+#+end_quote
+It's the object that decides how to handle a message that it receives: it can be
+a simple method call, but it can also be an intricate web of messages to other
+objects to try multiple approaches. Note that I'm not sure whether the
+connection I make here, is correct.
+
+Let's go back to the following quote by Kay:
+#+begin_quote
+OOP to me means only messaging, local retention and protection and hiding of
+state-process, and extreme late-binding of all things.
+#+end_quote
+Ths means that if you use classes or inhertance in your programming language of
+choice, your design doesn't automatically become object oriented. Classes and
+inheritance are a means to an end, but not the only means. Time to throw away
+the pie.
+
+I want to end this note with the following, practical quote from the
+[[https://computinged.wordpress.com/2010/09/11/moti-asks-objects-never-well-hardly-ever/#comment-3766][aforementioned comment]] by Alan Kay:
+#+begin_quote
+If you are “setting” values from the outside of an object, you are doing
+“simulated data structure programming” rather than object oriented programming.
+[...] “Real OOP” is much more about “requests”, and the more the requests invoke
+goals the object knows how to accomplish, the better.
+#+end_quote

@@ -1,0 +1,95 @@
+{
+    "[python]": {
+        "editor.formatOnType": true
+    },
+    "vim.easymotion": true,
+    "vim.useSystemClipboard": true,
+    "vim.normalModeKeyBindingsNonRecursive": [
+        {
+            "before": [
+                "<space>"
+            ],
+            "commands": [
+                "vspacecode.space"
+            ]
+        },
+        {
+            "before": [
+                ","
+            ],
+            "commands": [
+                "vspacecode.space",
+                {
+                    "command": "whichkey.triggerKey",
+                    "args": "m"
+                }
+            ]
+        }
+    ],
+    "vim.visualModeKeyBindingsNonRecursive": [
+        {
+            "before": [
+                "<space>"
+            ],
+            "commands": [
+                "vspacecode.space"
+            ]
+        },
+        {
+            "before": [
+                ","
+            ],
+            "commands": [
+                "vspacecode.space",
+                {
+                    "command": "whichkey.triggerKey",
+                    "args": "m"
+                }
+            ]
+        }
+    ],
+    "search.collapseResults": "alwaysCollapse",
+    "terminal.integrated.defaultProfile.windows": "Command Prompt",
+    "testing.automaticallyOpenPeekView": "never",
+    "references.preferredLocation": "view",
+    "editor.quickSuggestionsDelay": 500,
+    "editor.minimap.enabled": false,
+    "workbench.sideBar.location": "right",
+    "python.testing.pytestArgs": [
+        "--tb=line"
+    ],
+    "editor.guides.indentation": false,
+    "editor.occurrencesHighlight": false,
+    "editor.lightbulb.enabled": false,
+    "vspacecode.bindingOverrides": [
+        {
+            "keys": [
+                "m",
+                "languageId:python",
+                "t",
+                "t"
+            ],
+            "name": "Run test at cursor",
+            "icon": "list-unordered",
+            "type": "command",
+            "command": "testing.runAtCursor",
+        },
+        {
+            "keys": [
+                "m",
+                "languageId:python",
+                "t",
+                "T"
+            ],
+            "name": "Debug test at cursor",
+            "icon": "debug-alt",
+            "type": "command",
+            "command": "testing.debugSelected",
+        }
+    ],
+    "workbench.colorTheme": "Spacemacs - dark",
+    "scm.diffDecorationsGutterVisibility": "hover",
+    "editor.lineNumbers": "relative",
+    "workbench.editor.showTabs": false,
+    "workbench.editor.revealIfOpen": true
+}

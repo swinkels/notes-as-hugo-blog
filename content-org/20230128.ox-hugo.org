@@ -1,0 +1,94 @@
+#+HUGO_BASE_DIR: ../
+#+HUGO_SECTION: posts/2023/01/28
+#+HUGO_SLUG: fix-"cannot-open"-error-messages-when-using-dash-docs
+
+* Fix "cannot open" error messages when using dash-docs
+:PROPERTIES:
+:EXPORT_FILE_NAME: 20230128.md
+:EXPORT_DATE: 2023-01-28
+:END:
+
+Haha, initially this note described a fix I made for an issue in [[https://github.com/dash-docs-el/helm-dash][helm-dash]] and
+that I created a pull request to get it merged upstream. However, while writing
+this note I realized I implemented the wrong approach and that I had to close
+the pull request unmerged. Let's describe the problem first.
+
+** The problem
+
+In [[file:20230116.org][my note]] about helm-dash, an Emacs package to access offline documentation
+provided by [[https://kapeli.com/dash][Dash]], I mentioned the ~*dash-docs-error*~ buffer opens with messages
+like this:
+#+begin_example
+cannot open: "''"
+
+cannot open: "''"
+
+cannot open: "''"
+
+cannot open: "''"
+----------------
+ HEY! This is dash-docs (sqlite) error logging. If you want to disable it, set `dash-docs-enable-debugging` to nil
+----------------
+#+end_example
+Some googling lead me to [[https://sqlite.org/forum/forumpost/577873aa57777b91][this thread]] on the SQLite forum about a change in
+behavior of command-line option ~--init~[fn:1]. For SQLite versions older than
+3.34.0, you would pass ~-init ""~. But starting with 3.34.0, SQLite will report
+the error that file ~""~ doesn't exist. To avoit that error message, you need to
+pass the null device instead. The helm-dash package still passes ~-init ""~ and
+hence the error messages.
+
+** The pull request
+
+I developed a fix to the underlying Emacs package [[https://github.com/dash-docs-el/dash-docs/pull/18][dash-docs]] to pass the right
+~-init~ option depending on the SQLite version. In one of the last commits,
+while adding docstrings, I had the fleeting thought "would it also work if I use
+the null-device for older versions of SQLite?". If so, it would allow me to
+remove a lot of the new code. "Nah, let's finish the documentation and we can
+have a look at this later..."
+
+As I prepared my pull request, I noticed the repo already had an [[https://github.com/dash-docs-el/dash-docs/pull/11][unmerged and
+closed pull request]] that addressed the same problem. Its implementation always
+passed the null device regardless of SQLite version :). "I should really test
+whether that works for older SQLite versions", but I created [[https://github.com/dash-docs-el/dash-docs/pull/18][the GitHub pull
+request]] anyway.
+
+** Re-evaluating the pull request
+
+The thought that passing the null-device also for older versions of SQLite would
+also work didn't let me go. To be honest, it would make my pull request
+hopelessly over-engineered. So I downloaded [[https://www.sqlite.org/2020/sqlite-tools-linux-x86-3330000.zip][SQLite 3.30.0]], modified the code to
+always pass the null-device, tested it and... it worked! The first thing I did
+was [[https://github.com/dash-docs-el/dash-docs/pull/18#issuecomment-1407438486][close the pull request]].
+
+** Re-evaluating the process
+
+That was slightly embarrassing. My 100-line pull request (including
+documentation and unit tests) could be replaced by a one-liner. Could I have
+avoided the unnecessary work? I think so... the development & release process
+behind SQLite doesn't strike me as one that introduces a breaking change only
+via a one-line entry in its release notes. And I did have "that fleeting
+thought", albeit at a late stage during development and I didn't act on it.
+
+** And upstream?
+
+I already had my doubts whether my pull request would have been picked up as the
+[[https://github.com/dash-docs-el/helm-dash][dash-docs-el organization on GitHub]] is light on activity. The dash-docs repo has
+[[https://github.com/dash-docs-el/dash-docs/issues/17][an issue]] from 22 July 2022 that mentions the error message, and which didn't get
+a reaction from the maintainer. The unmerged and closed pull request that
+addressed the issue even precedes it. Then there's issue [[https://github.com/dash-docs-el/helm-dash/issues/201][helm-dash#201]], "(Read
+before posting) Project unmaintained?". Its first comment states:
+#+begin_quote
+Some metrics (as of Jun '22):
+- Last project commit is 3y ago.
+- 21 open issues (oldest from 2015), with support (non-feature) requests
+  unanswered since 3y ago.
+- 8 open PR (oldest from 2016), incl. 4 without any review dating 4y ago
+#+end_quote
+
+This means I'll fix my fork of dash-docs and install that forked version
+instead.
+
+** Footnotes
+
+[fn:1] The [[https://www.sqlite.org/changes.html][SQLite Release History page]] briefly mentions this change in behavior
+in the release notes for version 3.34.0.

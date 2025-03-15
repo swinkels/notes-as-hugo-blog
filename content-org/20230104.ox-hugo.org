@@ -1,0 +1,44 @@
+#+HUGO_BASE_DIR: ../
+#+HUGO_SECTION: posts/2023/01/04
+#+HUGO_SLUG: poetry-dependency-resolution-and-python-versions
+
+* Poetry dependency resolution and Python versions            :python:poetry:
+:PROPERTIES:
+:EXPORT_FILE_NAME: 20230104.md
+:EXPORT_DATE: 2023-01-04
+:END:
+
+In a virtualenv using Python 3.9.15, a ~poetry install~ failed with the
+following message:
+#+begin_src
+Updating dependencies
+Resolving dependencies...
+
+The current project's Python requirement (>=3.9,<4.0) is not compatible with some of the required packages Python requirement:
+  - numpy requires Python >=3.7,<3.11, so it will not be satisfied for Python >=3.11,<4.0
+#+end_src
+
+As Python 3.9.1 satisfies both the "current project's Python requirement" and
+that of numpy, I wondered why the command failed. Some googling lead me to [[https://python-poetry.org/docs/master/faq/#why-is-poetry-telling-me-that-the-current-projects-python-requirement-is-not-compatible-with-one-or-more-packages-python-requirements][this
+question]] in the poetry FAQ:
+#+begin_quote
+Unlike pip, Poetry doesn’t resolve for just the Python in the current
+environment. Instead it makes sure that a dependency is resolvable within the
+given Python version range in pyproject.toml.
+#+end_quote
+
+It took me a while to let this sink in but it totally makes sense: you have a
+project that states "I work with Python >=3.9,<4.0" even though one of its
+dependencies states "I only work with Python >=3.7,<3.11". They cannot both be
+right so Poetry does the right things and aborts.
+
+This brings me to another point: the Python requirement ">=3.9,<4.0" makes sense
+if Python adheres to semantic versioning. Unfortunately, according to [[https://discuss.python.org/t/documenting-python-versioning-and-stability-expectations/11090][this
+discussion]], it does not:
+#+begin_quote
+Despite similarities, Python does not use the popular semantic versioning_
+scheme, which was published several decades after Python.
+#+end_quote
+This doesn't mean Python 3.11 isn't compatible to a Python 3.9 for a particular
+code base, but there are no guarantees that it is. So you might want to rethink
+a Python requirement like ">=3.9,<4.0".

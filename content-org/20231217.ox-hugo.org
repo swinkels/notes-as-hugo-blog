@@ -1,0 +1,103 @@
+#+HUGO_BASE_DIR: ../
+#+HUGO_SECTION: posts/2023/12/17
+#+HUGO_SLUG: using-older-documentation-with-dash
+
+* Using older documentation with Dash                                 :emacs:
+:PROPERTIES:
+:EXPORT_FILE_NAME: 20231217.md
+:EXPORT_DATE: 2023-12-17
+:END:
+
+In note [[file:../01/20230116.org][20230116]] I talked about the offline API browser [[https://kapeli.com/dash][Dash]], a MacOS
+application that lets you download the HTML documentation for various software
+packages and search it offline. Dash doesn't download the HTML documentation
+from the original package location, but from its own sites. Other clients than
+Dash can download these so-called docsets, but only Dash can download docsets
+for older versions of a software package. Other clients can only access the most
+recent build. This note describes how to build the docsets for older versions
+yourself and install them side-by-side.
+
+Directory https://github.com/Kapeli/feeds lists the XML files that each describe
+where to download the documentation for one. Take for example [[https://github.com/Kapeli/feeds/blob/master/Python_3.xml][Python_3.xml]],
+which starts as follows:
+#+begin_src xml
+<entry>
+    <version>.12.1</version>
+    <ios_version>1</ios_version>
+    <url>http://sanfrancisco.kapeli.com/feeds/Python_3.tgz</url>
+    <url>http://london.kapeli.com/feeds/Python_3.tgz</url>
+    <url>http://newyork.kapeli.com/feeds/Python_3.tgz</url>
+    <url>http://tokyo.kapeli.com/feeds/Python_3.tgz</url>
+    <url>http://frankfurt.kapeli.com/feeds/Python_3.tgz</url>
+    <other-versions>
+        <version><name>3.12.1</name></version>
+        <version><name>3.12.0</name></version>
+        <version><name>3.11.6</name></version>
+        <version><name>3.11.5</name></version>
+        <version><name>3.11.4</name></version>
+#+end_src
+
+The XML refers to other versions that are available/known. I googled for their
+URL but didn't find much. The Google Group for Zeal, a Linux client for docsets,
+has [[https://groups.google.com/g/zealdocs/c/GHWdXpr0uno][this question]] from August 2015 that asks where you can download older
+versions. The thread doesn't give a definite answers, but it does mention Zeal
+GitHub issue [[https://github.com/zealdocs/zeal/issues/208][#208]] (and to be complete, a broken link to an older ExtJS package).
+About the issue, it's unresolved and ends with a question for pointers from
+June 2023. So it seems that downloading the other, older docsets is not an
+option for other clients.
+
+** Creating and installing docsets for older packages
+
+Fortunately you can build the docsets yourself thanks to the excellent [[https://github.com/hynek/doc2dash][doc2dash]]
+utility by Hynek Schlawack. For example, the following small script
+
+- downloads the offline documentation for Python 3.9.7 to ~/tmp~ and unzips it, and
+- calls doc2dash to create a docset named ~Python-3.9.7~.
+
+#+begin_src sh eval: never
+cd /tmp
+wget https://docs.python.org/ftp/python/doc/3.9.7/python-3.9.7-docs-html.zip
+unzip python-3.9.7-docs-html.zip
+doc2dash --name Python-3.9.7 python-3.9.7-docs-html
+#+end_src
+
+When successful, these commands end with:
+#+begin_example
+Converting intersphinx docs from '/tmp/python-3.9.7-docs-html' to 'Python-3.9.docset'.
+Parsing documentation...
+Added 12,915 index entries.
+Patching for TOCs... ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
+#+end_example
+
+To install it, copy directory ~/tmp/Python-3.9.docset~ to ~~/.docsets~ and it
+should be available to the Dash client of your choice. By the way, note that the
+name of the docset is ~Python-3.9.docset~, even though I specified the patch
+version. I don't know what the rationale for that is - haven't looked into it
+yet - but it's a nitpick.
+
+One word of warning: do not call ~doc2dash~ for documentation in your current
+directory. If you do something like ~doc2dash --name Python-3.9.7 .~, ~doc2dash~
+will also pick up the new HTML files that it just generated, again and again and
+again. This will result in really large directory trees...
+
+** Enabling docsets in Emacs
+
+In note [[file:../02/20230226.org][20230226]] I describe how to configure a specific set of docsets for
+Python mode in Spacemacs. That approach is still valid but it specifies the same
+docsets for each Python project. This is not ideal when you use different Python
+versions for different projects. Fortunately you can also configure
+project-specific docsets.
+
+[[https://github.com/dash-docs-el/dash-docs][dash-docs]] provides buffer-local variable ~dash-docs-docsets~ to list the docsets
+that should be active for that buffer. If you set that variable as a
+directory-local variable in a ~.dir-locals.el~, you have your project-specific
+docsets. For example, in one of my projects I use the following setup:
+#+begin_src emacs-lisp
+;;; Directory Local Variables
+;;; For more information see (info "(emacs) Directory Variables")
+
+((python-mode . ((dash-docs-docsets . ("Python-3.9" "Pandas-1.3"))))
+#+end_src
+
+A more ad-hoc approach is via interactive function ~helm-dash-activate-docset~.
+Execute it, select the docset you also want to activate and you're off to go.

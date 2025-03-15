@@ -1,0 +1,168 @@
+#+HUGO_BASE_DIR: ../
+#+HUGO_SECTION: posts/2023/04/23
+#+HUGO_SLUG: trying-out-visual-studio-(wip)
+
+* Trying out Visual Studio (WIP)
+:PROPERTIES:
+:EXPORT_FILE_NAME: 20230423.md
+:EXPORT_DATE: 2023-04-23
+:END:
+
+For the first time in 6 years, I had to use Windows for Python development for
+one of my contracts. Using Windows isn't a problem, but it turned out that using
+Spacemacs on Windows wasn't as seamless an experience as I remember the use of a
+rather standard Emacs config was. It takes about 40 seconds to load my Spacemacs
+config, magit is almost unusably slow and the biggest issue: several times a
+week I have to kill Emacs because the helm interface locks up.
+
+It could be that some of these issues are due to the fact that I have to use a
+locked-down company laptop that has all kinds of virus and monitoring tools
+active. However, the slowness was something I experienced on my home Windows PC
+too. So I decided to try out Visual Studio.
+
+** Initial impressions
+
+First of all, VSCode starts up really fast, within two seconds. This doesn't
+mean it has fully initialized itself but it's ready for editing. As mentioned,
+on the same laptop, my Spacemacs config takes about 40 seconds.
+
+The UI reminds of a well-lit front-garden during Christmas time. Apart from the
+text of the code, there are all kinds of (to me) distracting visual cues. For
+example, you have the "indentation guides", virtual bars in your code that
+indicate blocks of code at the same level. If the cursor is at a variable, all
+instances of that variable are automatically highlighted. Furtunately, VSCode is
+extremely configurable and you can significantly reduce the visual clutter.
+
+It's very nice that you don't need a mouse to access most functionality. If you
+press ~<ctrl> <shift> p~, the "Command Palette" opens. This is a drop-down box
+this lists all commands and as soon as you start typing, it only shows the
+commands that match the characters you type. To execute a command, select it and
+press ~<enter>~. The commands that have a direct keyboard shortcut are listed
+with that shortcut and this helps you memorize them.
+
+VSCode comes with a lot of plugins, "extensions" to extend its functionality.
+Finding them and installing them is easy. One of the first I installed were [[https://github.com/VSCodeVim/Vim][Vim]],
+a Vim emulation, and [[https://vspacecode.github.io/][VSpaceCode]], Spacemacs-like keybindings to access VSCode
+commands. This made the editing experience a very familiar one.
+
+** Working with VSCode
+
+The keybindings that VSpaceCode adds work when you're inside a code editor but when
+the focus is somewhere else, you have to rely on the official ones. For example,
+~<space> p f~ opens the "Search files by name" dialog. When you're inside the
+Explorer, that keybinding doesn't work and you have to use the official one,
+~<ctrl>+<shift>+F~. Fortunately, most of the original keybindings seem to be
+still in-place.
+
+There are some interesting comments about the Peek view at GitHub [[https://github.com/microsoft/vscode/issues/22261][vscode/#22261]],
+"make finding all references more user-friendly". Apparently I'm not the only
+one that has trouble warming up to it, two quotes from different users,
+- "Whenever I try to use Find References now, it just adds to my confusion. The
+  file within a file view [...] just doesn't work for me."
+- "The fact that it is rendered right inline is not helpful to me, and is
+  visually confusing to have a snippet of code from somewhere else displayed
+  right in the middle of where I am."
+
+One of the comments for this GitHub issue mentiond that VSCode can show the
+references in the sidebar - set Settings | Extensions | Reference Search View |
+Prefered Location to ~view~. This only works for the original keybinding
+~<shift> <alt> F12~. VSpaceCode keybinding ~, g r~ still uses the Peek view.
+
+As one user comments, showing references in the sidebar gives you a very narrow
+view on the code. The bottom panel would be a better candidate as it has the
+same width as editors.
+
+When I tried to run a unit test with a ~breakpoint()~ statement, I was greeted
+with a Windows dialog that stated 'Duplicate entries in "env": Path'. This lead
+me to Github [[https://github.com/microsoft/vscode-python/issues/10722][vscode/#10722]], "Debugging test in VS Code does not work". [[https://github.com/microsoft/vscode-python/issues/10722#issuecomment-618936241][One]] of
+the comments suggests to add a specific configuration to ~launch.json~ and
+indeed, the workaround does the trick. I didn't investigate that any further.
+
+By the way, when I used the "Debug Console" in the bottom panel, I noticed some
+of the commands I'm used to don't work. For example, ~c~, short for ~continue~,
+gives me a "name 'c' is not defined". You have to use the VSCode Debug toolbar
+to jump over or into the next command, to continue etc. I think that VSCode
+comes with its own Python debugger and doesn't use ~pdb~.
+
+I noticed that the Python test runner jumps to the function header of a failing
+test instead of the actual assertion failure. This seems like a very puzzling UI
+decision.
+
+Furthermore, by default VSCode shows the test output in a Peek view, which makes
+the UI too "restless" for my liking, too "in your face". I disabled that - set
+Settings | Features | Testing | Automatically Open Peek View to ~never~.
+
+About terminology, what Emacs calls a window, VSCode calls an editor. Just as
+you can split a window in Emacs, you can split an editor in VSCode. This creates
+a new "Editor Group" and by default, the new editor contains a new instance of
+the same file. So changes you make in the new editor aren't automatically
+reflected in the original editor. To change this behavior and share open files
+between Editor Groups, select Settings | Workbench | Editor | Reveal If Open.
+
+** Reduce visual clutter
+
+To minimize I closed the sidebar and removed the tabs that are shown on each
+editor. About the latter - remove check on Settings | Workbench | Editor | Show
+Tabs
+
+Hide the indentation guides - uncheck Settings | Editor | Guides | Indentation
+
+Disable automatic highlighting of current variable - uncheck Settings | Editor |
+Occurrences Highlight
+
+Disable editor lightbulb - uncheck Settings | Editor | Lightbulb
+
+Disable Git change indicates in the gutter - set Settings | SCM: Diff
+
+Decorations Gutter Visibility to hover Not possible to disable, but enable on
+hover is a good compromise.
+
+Relative line numbers - set Editor: Line Numbers to relative
+
+Jump to beginning of function ~<ctrl> + <shif> + o~ followed by ~<enter>~.
+
+show problem hover: https://stackoverflow.com/a/60042135 ~<ctrl>+k <ctrl>+i~
+or better ~<space> e e~, and also ~g h~
+
+show Problems panel ~<ctrl>+<shift>+m~ This also switches to the panel.
+or better ~<space> e l~
+
+** Final impressions
+
+** Appendix
+*** Shortcuts
+
+|                          | VSpaceCode    | Vim   | Default            | Remark                |
+|--------------------------+---------------+-------+--------------------+-----------------------|
+| Switch focus to Explorer |               |       | ~<ctrl> <shift> E~ |                       |
+| Search in files          | ~<space> /~   |       | ~<ctrl> <shift> F~ |                       |
+| Command Palette          |               |       | ~<ctrl> <shift> P~ |                       |
+| Show hover               | ~<space> e e~ | ~g h~ |                    |                       |
+| View: Toggle Problems    | ~<space> e l~ |       | ~<ctrl> <shift> m~ | ~flycheck-error-list~ |
+| Switch to Sidebar        |               |       | ~<ctrl> 0~         |                       |
+| Switch to Editor Group 1 |               |       | ~<ctrl> 1~         |                       |
+
+
+- Extension edamagit doesn't pick up Git installed by Scoop, see [[https://github.com/kahole/edamagit/issues/243#issuecomment-1478904138][this comment]] at
+  GitHub [[https://github.com/kahole/edamagit/issues/243#issuecomment-1478904138][edamagit/#243]].
+- Extension VSpaceCode "Select and run test" runs all tests instead of just the
+  test at the cursor.
+
+*** Settings files
+
+VSCode maintains its settings in 2 files:
+
+- ~%APPDATA%/Code/User/settings.json~ :: general, user-specific VSCode settings
+- ~.vscode/settings.json~ :: project-specific settings
+
+*** Miscellaneous notes
+
+Ctrl+Shift+E switches focus to Explorer. When you are already in the Explorer,
+it switches to the editor that had the focus.
+
+Ctrl+Shift+F switches focus to Search (in files). I reconfigured it to
+automatically collapse the search results by file - set Settings | Features |
+Search | Collapse Results to alwaysCollapse.
+
+~<ctrl>+0~ switches to the sidebar, ~<ctrl>+1~ switches to the editor that had
+the focus.
