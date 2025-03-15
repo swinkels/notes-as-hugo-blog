@@ -1,0 +1,48 @@
+This repo contains the static website for the collection of my notes at
+https://github.com/swinkels/notes.
+
+The website is generated using [[https://gohugo.io/][Hugo]], an open-source static site generator, and
+[[https://themes.gohugo.io/themes/hugo-blog-awesome/][Hugo blog awesome]], a Hugo theme for blogging. The notes are written using [[https://www.gnu.org/software/emacs/][Emacs]],
+an extremely customizable /libre/ text editor[fn:1] and [[https://orgmode.org/][org-mode]], an Emacs
+extension to author documents (and much more).
+
+* Site contents
+
+The following subdirectories of this repo contain the content of the site:
+
+- content-org/ :: (slightly) modified versions of my original notes that can be
+  automatically exported to Markdown, which is the markup language that Hugo
+  uses. The modified versions still use org-mode.
+- content/ :: my notes in Markdown, which are generated from the versions in
+  ~content-org/~.
+- static/ :: files referenced by the notes in ~content-org/~ and ~content/~,
+  such as images and code examples.
+
+The following tools are used to convert the original notes for use with
+Hugo:
+
+- [[https://github.com/swinkels/orgox][orgox]] :: Emacs package to convert my original notes to a version that can be
+  automatically exported by ox-hugo[fn:2]
+- [[https://ox-hugo.scripter.co/][ox-hugo]] :: extension to org-mode that exports org-mode files to
+  Hugo-compatible Markdown
+
+* Initial site
+
+The first commit to this repo only contains the files Hugo needs to generate an
+empty site. It was generated using Hugo v0.140.2 using the following commands:
+#+begin_src sh
+# create the new site
+hugo new site the-journey-that-counts-hugo
+
+# add theme Hugo blog awesome
+git submodule add https://github.com/hugo-sid/hugo-blog-awesome.git themes/hugo-blog-awesome
+#+end_src
+The submodule was added at commit [[https://github.com/hugo-sid/hugo-blog-awesome/commit/5056c6e187d4c2943449459ec693660314cca2b4][5056c6e]], wich was authored on December
+24, 2024.
+
+* Footnotes
+
+[fn:1] To me, Emacs is also a way of (developer) life.
+
+[fn:2] I've developed orgox myself. At the time of writing it works for my use
+case but it's not ready for general use yet.
